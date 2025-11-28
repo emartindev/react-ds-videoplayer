@@ -1,0 +1,36 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(circle at top, #1f2937, #030712);
+}
+
+.app__content {
+  width: min(960px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.app__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: #60a5fa;
+  margin: 0;
+}
+
+.app h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #f8fafc;
+}
+
+.app__lead {
+  margin: 0 0 1rem;
+  color: #cbd5f5;
+  max-width: 60ch;
+  line-height: 1.5;
+}
