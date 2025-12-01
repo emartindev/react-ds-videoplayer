@@ -63,39 +63,54 @@ type VideoPlaylistItem = {
 }
 ```
 
-## TypeScript consumers
+## TypeScript & legacy props
 
-This package already ships its own `.d.ts` files via the build, but if you prefer the legacy `playlist` + `controls` prop surface you can install the ambient types shim:
+No extra typings package is required—the published build includes `.d.ts` files automatically. For projects that still use the original prop names, the component accepts the legacy shape as well:
 
-```bash
-npm i --save-dev @types/react-ds-videoplayer
+```ts
+<VideoPlaylistPlayer playlist={playlist} controls />
 ```
 
-That package exposes the following declaration so existing code keeps type-checking:
+Internally those map to the new `videos` and `showControls` props, so you can migrate gradually without breaking type safety.
+
+### Troubleshooting missing module types
+
+Some toolchains cache earlier versions of the package or strip `.d.ts` files. If your TypeScript build complains that it cannot find types for `react-ds-videoplayer`, explicitly declare the module once in your project (for example in `react-ds-videoplayer.d.ts`):
 
 ```ts
 declare module 'react-ds-videoplayer' {
-  import { ComponentType, HTMLAttributes } from 'react'
+  import { ComponentType, CSSProperties } from 'react'
 
-  export interface VideoSource {
+  export type VideoPlaylistItem = {
+    id?: string
     src: string
-    type?: string
-    poster?: string
     title?: string
+    description?: string
+    poster?: string
+    type?: string
   }
 
-  export interface VideoPlaylistPlayerProps extends HTMLAttributes<HTMLDivElement> {
-    playlist: VideoSource[]
+  export type VideoPlaylistPlayerProps = {
+    videos?: VideoPlaylistItem[]
+    playlist?: VideoPlaylistItem[]
+    initialIndex?: number
     autoPlay?: boolean
     loop?: boolean
     muted?: boolean
+    showControls?: boolean
     controls?: boolean
+    showMetadata?: boolean
+    showPlaylist?: boolean
+    onVideoChange?: (video: VideoPlaylistItem, index: number) => void
     className?: string
+    style?: CSSProperties
   }
 
   export const VideoPlaylistPlayer: ComponentType<VideoPlaylistPlayerProps>
 }
 ```
+
+Shipping versions 0.1.4 and higher already bundle this declaration under `types/react-ds-videoplayer/index.d.ts`, so deleting your lockfile or reinstalling dependencies usually resolves the issue.
 
 ## Local development
 

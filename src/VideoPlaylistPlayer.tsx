@@ -11,12 +11,14 @@ export type VideoPlaylistItem = {
 }
 
 export type VideoPlaylistPlayerProps = {
-  videos: VideoPlaylistItem[]
+  videos?: VideoPlaylistItem[]
+  playlist?: VideoPlaylistItem[]
   initialIndex?: number
   autoPlay?: boolean
   loop?: boolean
   muted?: boolean
   showControls?: boolean
+  controls?: boolean
   showMetadata?: boolean
   showPlaylist?: boolean
   onVideoChange?: (video: VideoPlaylistItem, index: number) => void
@@ -32,21 +34,28 @@ const clampIndex = (index: number, total: number) => {
 
 export function VideoPlaylistPlayer({
   videos,
+  playlist,
   initialIndex = 0,
   autoPlay = true,
   loop = true,
   muted = true,
   showControls = false,
+  controls,
   showMetadata = false,
   showPlaylist = false,
   onVideoChange,
   className,
   style,
 }: VideoPlaylistPlayerProps) {
-  const [currentIndex, setCurrentIndex] = useState(() => clampIndex(initialIndex, videos.length))
-  const activeIndex = clampIndex(currentIndex, videos.length)
-  const currentVideo = videos[activeIndex]
-  const hasPlaylist = Boolean(showPlaylist && videos.length > 1)
+  const resolvedVideos = useMemo(
+    () => (videos && videos.length > 0 ? videos : playlist ?? []),
+    [videos, playlist],
+  )
+  const controlsEnabled = showControls ?? controls ?? false
+  const [currentIndex, setCurrentIndex] = useState(() => clampIndex(initialIndex, resolvedVideos.length))
+  const activeIndex = clampIndex(currentIndex, resolvedVideos.length)
+  const currentVideo = resolvedVideos[activeIndex]
+  const hasPlaylist = Boolean(showPlaylist && resolvedVideos.length > 1)
 
   useEffect(() => {
     if (currentVideo) {
@@ -69,15 +78,15 @@ export function VideoPlaylistPlayer({
   )
 
   const selectVideo = (index: number) => {
-    setCurrentIndex(clampIndex(index, videos.length))
+    setCurrentIndex(clampIndex(index, resolvedVideos.length))
   }
 
   const goNext = () => {
     setCurrentIndex((prev) => {
-      if (!videos.length) return prev
+      if (!resolvedVideos.length) return prev
       const next = prev + 1
 
-      if (next >= videos.length) {
+      if (next >= resolvedVideos.length) {
         return loop ? 0 : prev
       }
 
@@ -85,7 +94,7 @@ export function VideoPlaylistPlayer({
     })
   }
 
-  if (!videos.length) {
+  if (!resolvedVideos.length) {
     return null
   }
 
@@ -104,30 +113,29 @@ export function VideoPlaylistPlayer({
           <video
             key={currentVideo.src}
             className="video-playlist-player__media"
-            controls={showControls}
+            controls={controlsEnabled}
             poster={currentVideo.poster}
             autoPlay={autoPlay}
-            loop={loop && videos.length === 1}
+            loop={loop && resolvedVideos.length === 1}
             muted={muted}
             playsInline
-            onEnded={videos.length > 1 ? goNext : undefined}
+            onEnded={resolvedVideos.length > 1 ? goNext : undefined}
           >
             <source src={currentVideo.src} type={currentVideo.type} />
             Your browser does not support the video tag.
           </video>
+          {shouldRenderMeta ? (
+            <div className="video-playlist-player__meta" aria-live="polite">
+              {currentVideo.title ? <h2>{currentVideo.title}</h2> : null}
+              {currentVideo.description ? <p>{currentVideo.description}</p> : null}
+            </div>
+          ) : null}
         </div>
-
-        {shouldRenderMeta ? (
-          <div className="video-playlist-player__meta">
-            {currentVideo.title ? <h2>{currentVideo.title}</h2> : null}
-            {currentVideo.description ? <p>{currentVideo.description}</p> : null}
-          </div>
-        ) : null}
       </div>
 
       {showPlaylist ? (
         <ol className="video-playlist-player__playlist">
-          {videos.map((video, index) => {
+          {resolvedVideos.map((video, index) => {
             const isActive = index === activeIndex
 
             return (
