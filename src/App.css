@@ -34,3 +34,8 @@
   max-width: 60ch;
   line-height: 1.5;
 }
+
+.app__player {
+  width: 100%;
+  height: min(640px, 70vh);
+}

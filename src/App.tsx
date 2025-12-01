@@ -42,7 +42,9 @@ function App() {
           instantly get a modern video experience with a built-in playlist.
         </p>
 
-        <VideoPlaylistPlayer videos={demoPlaylist} />
+        <div className="app__player">
+          <VideoPlaylistPlayer videos={demoPlaylist} showPlaylist showMetadata />
+        </div>
       </div>
     </main>
   )

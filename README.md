@@ -28,7 +28,7 @@ const videos = [
 ]
 
 export function Page() {
-  return <VideoPlaylistPlayer videos={videos} />
+  return <VideoPlaylistPlayer videos={videos} showPlaylist showMetadata />
 }
 ```
 
@@ -38,10 +38,17 @@ export function Page() {
 | --- | --- | --- | --- |
 | `videos` | `VideoPlaylistItem[]` | — | Required playlist data. Each item needs at least a `src`. |
 | `initialIndex` | `number` | `0` | Zero-based index to start the playlist. Clamped to valid range. |
-| `autoPlay` | `boolean` | `true` | Plays the selected video automatically when it changes. |
+| `autoPlay` | `boolean` | `true` | Videos auto-play so the player starts immediately. |
+| `loop` | `boolean` | `true` | Repeats the playlist (and single videos) automatically. |
+| `muted` | `boolean` | `true` | Required for auto-play on most browsers; you can opt out if needed. |
+| `showControls` | `boolean` | `false` | Reveals native video controls (hidden by default). |
 | `onVideoChange` | `(video, index) => void` | — | Fired whenever the active video updates. |
+| `showMetadata` | `boolean` | `false` | Renders title/description text below the video. |
+| `showPlaylist` | `boolean` | `false` | Displays the playlist selector; otherwise only the video renders. |
 | `className` | `string` | — | Inject custom class names for layout/theming. |
 | `style` | `CSSProperties` | — | Inline styles applied to the root wrapper. |
+
+> The player stretches to `width: 100%` / `height: 100%` by default. Pass a `style` prop or wrap it to constrain the size.
 
 ### `VideoPlaylistItem`
 
@@ -53,6 +60,40 @@ type VideoPlaylistItem = {
   description?: string
   poster?: string
   type?: string
+}
+```
+
+## TypeScript consumers
+
+This package already ships its own `.d.ts` files via the build, but if you prefer the legacy `playlist` + `controls` prop surface you can install the ambient types shim:
+
+```bash
+npm i --save-dev @types/react-ds-videoplayer
+```
+
+That package exposes the following declaration so existing code keeps type-checking:
+
+```ts
+declare module 'react-ds-videoplayer' {
+  import { ComponentType, HTMLAttributes } from 'react'
+
+  export interface VideoSource {
+    src: string
+    type?: string
+    poster?: string
+    title?: string
+  }
+
+  export interface VideoPlaylistPlayerProps extends HTMLAttributes<HTMLDivElement> {
+    playlist: VideoSource[]
+    autoPlay?: boolean
+    loop?: boolean
+    muted?: boolean
+    controls?: boolean
+    className?: string
+  }
+
+  export const VideoPlaylistPlayer: ComponentType<VideoPlaylistPlayerProps>
 }
 ```
 

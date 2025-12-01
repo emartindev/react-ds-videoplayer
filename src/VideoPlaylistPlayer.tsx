@@ -14,6 +14,11 @@ export type VideoPlaylistPlayerProps = {
   videos: VideoPlaylistItem[]
   initialIndex?: number
   autoPlay?: boolean
+  loop?: boolean
+  muted?: boolean
+  showControls?: boolean
+  showMetadata?: boolean
+  showPlaylist?: boolean
   onVideoChange?: (video: VideoPlaylistItem, index: number) => void
   className?: string
   style?: CSSProperties
@@ -29,6 +34,11 @@ export function VideoPlaylistPlayer({
   videos,
   initialIndex = 0,
   autoPlay = true,
+  loop = true,
+  muted = true,
+  showControls = false,
+  showMetadata = false,
+  showPlaylist = false,
   onVideoChange,
   className,
   style,
@@ -36,6 +46,7 @@ export function VideoPlaylistPlayer({
   const [currentIndex, setCurrentIndex] = useState(() => clampIndex(initialIndex, videos.length))
   const activeIndex = clampIndex(currentIndex, videos.length)
   const currentVideo = videos[activeIndex]
+  const hasPlaylist = Boolean(showPlaylist && videos.length > 1)
 
   useEffect(() => {
     if (currentVideo) {
@@ -48,84 +59,102 @@ export function VideoPlaylistPlayer({
     [className],
   )
 
+  const mergedStyle = useMemo<CSSProperties>(
+    () => ({
+      width: '100%',
+      height: '100%',
+      ...style,
+    }),
+    [style],
+  )
+
   const selectVideo = (index: number) => {
     setCurrentIndex(clampIndex(index, videos.length))
   }
 
-  const goPrev = () => {
-    setCurrentIndex((prev) => clampIndex(prev - 1, videos.length))
-  }
-
   const goNext = () => {
-    setCurrentIndex((prev) => clampIndex(prev + 1, videos.length))
+    setCurrentIndex((prev) => {
+      if (!videos.length) return prev
+      const next = prev + 1
+
+      if (next >= videos.length) {
+        return loop ? 0 : prev
+      }
+
+      return next
+    })
   }
 
   if (!videos.length) {
-    return (
-      <section className={safeClassName} style={style} aria-live="polite">
-        <p className="video-playlist-player__empty">Add at least one video to play the playlist.</p>
-      </section>
-    )
+    return null
   }
 
+  const shouldRenderMeta =
+    showMetadata && currentVideo && (currentVideo.title || currentVideo.description)
+
   return (
-    <section className={safeClassName} style={style} aria-label="Video playlist player">
+    <section
+      className={safeClassName}
+      style={mergedStyle}
+      data-has-playlist={hasPlaylist ? 'true' : undefined}
+      aria-label="Video playlist player"
+    >
       <div className="video-playlist-player__stage">
-        <video
-          key={currentVideo.src}
-          className="video-playlist-player__media"
-          controls
-          poster={currentVideo.poster}
-          autoPlay={autoPlay}
-          onEnded={goNext}
-        >
-          <source src={currentVideo.src} type={currentVideo.type} />
-          Your browser does not support the video tag.
-        </video>
+        <div className="video-playlist-player__media-wrapper">
+          <video
+            key={currentVideo.src}
+            className="video-playlist-player__media"
+            controls={showControls}
+            poster={currentVideo.poster}
+            autoPlay={autoPlay}
+            loop={loop && videos.length === 1}
+            muted={muted}
+            playsInline
+            onEnded={videos.length > 1 ? goNext : undefined}
+          >
+            <source src={currentVideo.src} type={currentVideo.type} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
 
-        <div className="video-playlist-player__meta">
-          <div>
-            <p className="video-playlist-player__eyebrow">Now playing</p>
-            <h2>{currentVideo.title ?? 'Untitled video'}</h2>
+        {shouldRenderMeta ? (
+          <div className="video-playlist-player__meta">
+            {currentVideo.title ? <h2>{currentVideo.title}</h2> : null}
+            {currentVideo.description ? <p>{currentVideo.description}</p> : null}
           </div>
-          {currentVideo.description ? <p>{currentVideo.description}</p> : null}
-        </div>
-
-        <div className="video-playlist-player__actions">
-          <button type="button" onClick={goPrev} disabled={activeIndex === 0}>
-            Previous
-          </button>
-          <button type="button" onClick={goNext} disabled={activeIndex === videos.length - 1}>
-            Next
-          </button>
-        </div>
+        ) : null}
       </div>
 
-      <ol className="video-playlist-player__playlist">
-        {videos.map((video, index) => {
-          const isActive = index === activeIndex
+      {showPlaylist ? (
+        <ol className="video-playlist-player__playlist">
+          {videos.map((video, index) => {
+            const isActive = index === activeIndex
 
-          return (
-            <li key={video.id ?? video.src}>
-              <button
-                type="button"
-                onClick={() => selectVideo(index)}
-                aria-current={isActive ? 'true' : undefined}
-              >
-                <span className="video-playlist-player__playlist-title">
-                  {video.title ?? `Video ${index + 1}`}
-                </span>
-                {video.description ? (
-                  <span className="video-playlist-player__playlist-description">{video.description}</span>
-                ) : null}
-                <span className="video-playlist-player__badge">
-                  {isActive ? 'Now playing' : `Play #${index + 1}`}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ol>
+            return (
+              <li key={video.id ?? video.src}>
+                <button
+                  type="button"
+                  onClick={() => selectVideo(index)}
+                  aria-current={isActive ? 'true' : undefined}
+                >
+                  {video.title ? (
+                    <span className="video-playlist-player__playlist-title">{video.title}</span>
+                  ) : (
+                    <span className="video-playlist-player__playlist-title">
+                      Track {index + 1}
+                    </span>
+                  )}
+                  {video.description ? (
+                    <span className="video-playlist-player__playlist-description">
+                      {video.description}
+                    </span>
+                  ) : null}
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      ) : null}
     </section>
   )
 }

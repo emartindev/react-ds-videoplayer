@@ -1,0 +1,21 @@
+{
+  "name": "@types/react-ds-videoplayer",
+  "version": "0.1.0",
+  "description": "TypeScript definitions for react-ds-videoplayer",
+  "license": "MIT",
+  "types": "index.d.ts",
+  "homepage": "https://github.com/emmettmartin/react-ds-videoplayer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emmettmartin/react-ds-videoplayer.git"
+  },
+  "keywords": [
+    "types",
+    "react-ds-videoplayer",
+    "typescript"
+  ],
+  "dependencies": {
+    "@types/react": "^19.2.5"
+  }
+}
+
