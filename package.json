@@ -1,6 +1,6 @@
 {
   "name": "react-ds-videoplayer",
-  "version": "0.1.7",
+  "version": "0.1.12",
   "private": false,
   "description": "A lightweight React video player with a built-in playlist.",
   "type": "module",

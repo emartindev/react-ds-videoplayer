@@ -43,8 +43,8 @@ export function Page() {
 | `muted` | `boolean` | `true` | Required for auto-play on most browsers; you can opt out if needed. |
 | `showControls` | `boolean` | `false` | Reveals native video controls (hidden by default). |
 | `onVideoChange` | `(video, index) => void` | — | Fired whenever the active video updates. |
-| `showMetadata` | `boolean` | `false` | Renders title/description text below the video. |
-| `showPlaylist` | `boolean` | `false` | Displays the playlist selector; otherwise only the video renders. |
+| `showMetadata` | `boolean` | `false` | Overlays the title/description in the top-left corner of the video with a darkened background for readability. |
+| `showPlaylist` | `boolean` | `false` | When `true`, the resolved playlist is logged to the console for debugging (no UI is rendered). |
 | `className` | `string` | — | Inject custom class names for layout/theming. |
 | `style` | `CSSProperties` | — | Inline styles applied to the root wrapper. |
 

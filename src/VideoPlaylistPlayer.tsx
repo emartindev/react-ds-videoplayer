@@ -55,13 +55,19 @@ export function VideoPlaylistPlayer({
   const [currentIndex, setCurrentIndex] = useState(() => clampIndex(initialIndex, resolvedVideos.length))
   const activeIndex = clampIndex(currentIndex, resolvedVideos.length)
   const currentVideo = resolvedVideos[activeIndex]
-  const hasPlaylist = Boolean(showPlaylist && resolvedVideos.length > 1)
 
   useEffect(() => {
     if (currentVideo) {
       onVideoChange?.(currentVideo, activeIndex)
     }
   }, [currentVideo, activeIndex, onVideoChange])
+
+  useEffect(() => {
+    if (showPlaylist && resolvedVideos.length > 0) {
+      // eslint-disable-next-line no-console
+      console.log('[VideoPlaylistPlayer] Current playlist', resolvedVideos)
+    }
+  }, [showPlaylist, resolvedVideos])
 
   const safeClassName = useMemo(
     () => ['video-playlist-player', className].filter(Boolean).join(' '),
@@ -76,10 +82,6 @@ export function VideoPlaylistPlayer({
     }),
     [style],
   )
-
-  const selectVideo = (index: number) => {
-    setCurrentIndex(clampIndex(index, resolvedVideos.length))
-  }
 
   const goNext = () => {
     setCurrentIndex((prev) => {
@@ -105,7 +107,6 @@ export function VideoPlaylistPlayer({
     <section
       className={safeClassName}
       style={mergedStyle}
-      data-has-playlist={hasPlaylist ? 'true' : undefined}
       aria-label="Video playlist player"
     >
       <div className="video-playlist-player__stage">
@@ -132,37 +133,6 @@ export function VideoPlaylistPlayer({
           ) : null}
         </div>
       </div>
-
-      {showPlaylist ? (
-        <ol className="video-playlist-player__playlist">
-          {resolvedVideos.map((video, index) => {
-            const isActive = index === activeIndex
-
-            return (
-              <li key={video.id ?? video.src}>
-                <button
-                  type="button"
-                  onClick={() => selectVideo(index)}
-                  aria-current={isActive ? 'true' : undefined}
-                >
-                  {video.title ? (
-                    <span className="video-playlist-player__playlist-title">{video.title}</span>
-                  ) : (
-                    <span className="video-playlist-player__playlist-title">
-                      Track {index + 1}
-                    </span>
-                  )}
-                  {video.description ? (
-                    <span className="video-playlist-player__playlist-description">
-                      {video.description}
-                    </span>
-                  ) : null}
-                </button>
-              </li>
-            )
-          })}
-        </ol>
-      ) : null}
     </section>
   )
 }
